@@ -6,6 +6,9 @@ mysql = MySQL()
 
 app = Flask(__name__)
 
+file = {}
+
+
 def init_db(user, password, database, host):
 	app.config['MYSQL_DATABASE_USER'] = user
 	app.config['MYSQL_DATABASE_PASSWORD'] = password
@@ -13,7 +16,12 @@ def init_db(user, password, database, host):
 	app.config['MYSQL_DATABASE_HOST'] = host
 	mysql.init_app(app)
 	
-
+def init_index():
+	cursor = mysql.connect().cursor()
+	cursor.execute("select file_id, name from files")
+	results = cursor.fetchall()
+	for row in results:
+		file[row[0]] = row[1]
 
 
 @app.route('/')
@@ -54,7 +62,7 @@ def search():
 @app.route('/detail/<project_id>/<fqn>')
 def detail(project_id, fqn):
 	cursor = mysql.connect().cursor()
-	cursor.execute("SELECT fqn, entity_type, offset FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
+	cursor.execute("SELECT fqn, entity_type, offset, file_id FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
 	results = cursor.fetchall()
 	cursor.execute("SELECT count(*) from relations where rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id)
 	usage = cursor.fetchall()
@@ -71,10 +79,11 @@ def detail(project_id, fqn):
 		project_name = row[0]
 
 
-	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use, project_name = project_name)
+	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use, project_name = project_name, file=file)
 
 
 			
 if __name__ == '__main__':
-	init_db('root', 'maruf123', 'sourcerer', 'localhost')
+	init_db('root', 'maruf123', 'nnsourcerer', 'localhost')
+	init_index()
 	app.run(debug = True)
