@@ -64,7 +64,7 @@ def detail(project_id, fqn):
 	cursor = mysql.connect().cursor()
 	cursor.execute("SELECT fqn, entity_type, offset, file_id FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
 	results = cursor.fetchall()
-	cursor.execute("SELECT count(*) from relations where rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id)
+	cursor.execute("SELECT COUNT(DISTINCT lhs_eid) from relations where rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id)
 	usage = cursor.fetchall()
 	
 	use = 1 ;
