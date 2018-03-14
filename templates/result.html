@@ -10,74 +10,62 @@
 
     <title>Result</title>
  	 </head>
-  		<body   >
+  		<body>
 
 
           <div class="container">
-              <div class="row">
-                  <div class="col align-self-start">
-               
-                  </div>
-
-                  <div class="col align-self-center col-10 col-sm-8 col-md-8 offset-md-2">
-        
-                        <form action = "http://127.0.0.1:5000/search" method = "POST" class="align-bottom  w-75 p-3 ">
-                            <div class="form-group" >
-                                  
+              <div class="row p-3">
+					<div class="col-1 p-2 offset-md-1"></div>
+                	<div class="col-md col-md-6 offset-md-1 p-2">
+                    	<form action = "http://127.0.0.1:5000/search" method = "POST">            
+                            <div class="form-group" >                              
                                   <input type="query" class="form-control" id="query"  placeholder="FQN" name="fqn">   
                             </div>
-                            <input class="btn btn-primary" type = "submit" value = "Search" />
-                        </form>
-                  </div>
-                  <div class="col align-self-end"> </div>  
-              </div>
+                	</div>
+
+                	<div class="col-sm">
+                      <div class="col align-self-start p-2"><input class="btn btn-primary" type = "submit" value = "Search" /> </div>
+                	</div>
+
+                		</form>
+                 
+              	</div>  
+              <hr>
+              <div class="row">
+	              <div class="card col-md-12">
+					  <div class="card-body">     <span style="color: #ff0000">{{fqn}} </span> is used by {{library}} libraries and {{project}} projects
+					  </div>
+					</div>
+			  </div>
+			  <hr>
+			  <div class ="row">
+			  		<table class="table table-striped col-md-7">
+  						<thead>
+    					<tr>
+					      <th>Project</th>
+					      <th>Project Type</th>
+					      <th>Number of time uses</th>
+					    </tr>
+					  </thead>
+					  <tbody> 	
+					  	{% for row in result: %}   	   
+					    	<tr>
+				
+					      		<td><a class="detail" href="{{ url_for('detail', project_id = row[2], fqn = fqn)}}">{{ row[0] }}</a></td>
+					      		<td>{{ row[1] }}</td>
+					      		<td>{{use[row[0]]}}</td>
+					      		
+					    	</tr>
+					    {% endfor %}
+  					</tbody>
+					</table>
+			  </div>
+
           </div>
 
 
 
-<div class="alert alert-success" role="alert">
-        <h3>{{fqn}} is used by {{use}} projects</h3>
-    </div>
 
-<div class="card col-md-7">
-  <div class="card-body">
-    {{fqn}} is used by {{use}} projects
-  </div>
-</div>
-
-
-
-<p></p> <p></p><p></p> <p></p>
-
-<div>
-
-
-<table class="table table-striped">
-  <thead>
-    <tr>
-      
-      <th>Project</th>
-      <th>Project Type</th>
-    </tr>
-  </thead>
-  <tbody>
-  	
-  	
-  	{% for row in result: %}
-		    	   
-
-    	<tr>
-      		
-      			
-      		<td><a class="detail" href="{{ url_for('detail', project_id = row[2], fqn = fqn)}}">{{ row[0] }}</a></td>
-      		<td>{{ row[1] }}</td>
-      		
-    	</tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-</div>
 
 
 

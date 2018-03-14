@@ -14,33 +14,41 @@ def init_db(user, password, database, host):
 	mysql.init_app(app)
 	
 
-#  258399 USES
 
 
 @app.route('/')
 def homepage():
 	return render_template('login.html')
-	#return redirect(url_for('query_db',query = fqn))
 	
-# sun.util.resources.el
 
 @app.route('/search' ,methods = ['POST', 'GET'])
 def search():
 	if request.method == 'POST':
 		result = request.form['fqn']		
 		cursor = mysql.connect().cursor()
+
+
 		cursor.execute("SELECT name, project_type, project_id FROM projects where project_id in (SELECT project_id FROM entities WHERE fqn  = '"+result+"')")
 		results = cursor.fetchall()
 		
-		
-		cursor.execute("SELECT COUNT(DISTINCT project_id) FROM entities WHERE fqn = '"+result+"'")
-		usage = cursor.fetchall()
+		library_count = 0
+		project_count = 0
 
-		use = 1 ;
-		for row in usage :
-			use = row[0]
+		use = {}
 
-		return render_template('result.html', result = results, fqn = result, use = use)
+		for row in results:
+			if row[1] == 'JAVA_LIBRARY':
+				library_count+=1
+			else:
+				project_count+=1
+			cursor.execute("SELECT COUNT(lhs_eid) FROM relations WHERE project_id = "+str(row[2])+" AND rhs_eid IN (SELECT entity_id FROM entities WHERE fqn ='"+result+"' AND project_id ="+str(row[2])+")")
+			count = cursor.fetchall()
+
+			for row1 in count:
+				use[row[0]] = row1[0]
+				
+
+		return render_template('result.html', result = results, fqn = result, library = library_count , project = project_count, use = use)
 
 
 @app.route('/detail/<project_id>/<fqn>')
@@ -55,8 +63,15 @@ def detail(project_id, fqn):
 	for row in usage :
 		use = row[0]
 
+	cursor.execute("SELECT name from projects WHERE project_id = "+project_id)
 
-	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use)
+	proj = cursor.fetchall()
+	project_name = ""
+	for row in proj:
+		project_name = row[0]
+
+
+	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use, project_name = project_name)
 
 
 			
