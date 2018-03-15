@@ -62,14 +62,22 @@ def search():
 @app.route('/detail/<project_id>/<fqn>')
 def detail(project_id, fqn):
 	cursor = mysql.connect().cursor()
-	cursor.execute("SELECT fqn, entity_type, offset, file_id FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
+	cursor.execute("SELECT fqn FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
 	results = cursor.fetchall()
-	cursor.execute("SELECT COUNT(DISTINCT lhs_eid) from relations where rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id)
-	usage = cursor.fetchall()
+
+	use_count = {}
+
+	for row in results:
+		if row[0] in use_count:
+			prev_use = use_count[row[0]]
+			cur_use = prev_use + 1
+			use_count[row[0]] = cur_use
+		else:
+			use_count[row[0]] = 1
+	use = len(use_count)
 	
-	use = 1 ;
-	for row in usage :
-		use = row[0]
+	cursor.execute("SELECT DISTINCT fqn, entity_type, offset, file_id FROM entities WHERE entity_id IN (SELECT lhs_eid FROM relations WHERE rhs_eid IN (SELECT entity_id FROM entities WHERE project_id = "+project_id+" AND fqn = '"+fqn+"') AND project_id = "+project_id+")")
+	results = cursor.fetchall()
 
 	cursor.execute("SELECT name from projects WHERE project_id = "+project_id)
 
@@ -79,7 +87,7 @@ def detail(project_id, fqn):
 		project_name = row[0]
 
 
-	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use, project_name = project_name, file=file)
+	return  render_template('detail.html', result = results, fqn = fqn, project_id = project_id, use = use, project_name = project_name, file=file, use_count = use_count)
 
 
 			

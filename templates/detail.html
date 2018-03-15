@@ -42,6 +42,7 @@
               <tr>
           <th>Who uses</th>
         <th>What type of entity uses</th>
+        <th>How many times used</th>
         <th>Where used</th>
         <th>File Name</th>
               </tr>
@@ -52,6 +53,7 @@
         
                     <td><a class="detail" href="{{ url_for('detail', project_id = project_id, fqn = row[0])}}">{{ row[0] }}</a></td>
                     <td>{{ row[1] }}</td>
+                    <td>{{ use_count[row[0]]}}</td>
                     <td>{{row[2]}}</td>
                     <td>{{file[row[3]]}}</td>
                 </tr>
